@@ -40,15 +40,24 @@ int main() {
         printf("SDL_CreateSurface Error: %s\n", SDL_GetError());
         SDL_Quit();
     }
+    
+    
     SDL_Rect p1;
     SDL_Rect p2;
     SDL_Event ev;
     int quit = 0;
+    uint64_t now = SDL_GetPerformanceCounter();
+    uint64_t last = 0;
+    double_t dt = 0.0;
 
     while(!quit)
     {
     while (SDL_PollEvent(&ev))
     {
+        last = now;
+        now = SDL_GetPerformanceCounter();
+        dt = (now - last)/ (double_t)SDL_GetPerformanceFrequency();
+
         switch(ev.type)
         {
             case SDL_KEYDOWN:
@@ -57,12 +66,12 @@ int main() {
                 {
                     case SDLK_w:
                     {
-                        PLAYER_POSITION_Y-=1 * PADDLE_SPEED;
+                        PLAYER_POSITION_Y-= (PADDLE_SPEED * dt * 80.0);
                     }
                     break;
                     case SDLK_s:
                     {
-                        PLAYER_POSITION_Y+= 1 * PADDLE_SPEED;
+                        PLAYER_POSITION_Y+= (PADDLE_SPEED * dt * 80.0);
                     }
                     break;
                 }
