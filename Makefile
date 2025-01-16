@@ -42,4 +42,3 @@ debug: $(TARGET)
 	@SDL_DEBUG=1 SDL_VIDEODRIVER=x11 gdb attach 6466  -ex lay next  --args $(TARGET)
 
 .PHONY: all clean rebuild debug
-
