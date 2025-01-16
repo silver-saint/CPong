@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_keycode.h>
 #include <stdio.h>
 #include <stdint.h>
 #include "player.h"
@@ -19,7 +20,8 @@ int quit = 0;
 
 
 int InitSDL(SDL_Window** win, SDL_Renderer** renderer, SDL_Surface** surface);
-void HandleInput(SDL_Event* ev);
+void HandleInput(SDL_Event* ev, Input* input);
+void ClampPosition(float* playerPos );
 int main() 
 {
     SDL_Window* win = NULL;
@@ -36,18 +38,21 @@ int main()
     SDL_Event ev;
     Uint64 NOW = SDL_GetPerformanceCounter();
     Uint64 LAST = 0;
+    Input input = {0,0};
+
+
     double deltaTime = 0;
     while (!quit)
     {
         if(SDL_PollEvent(&ev))
         {
-            HandleInput(&ev);
+            HandleInput(&ev, &input);
         }
         LAST = NOW;
         NOW = SDL_GetPerformanceCounter();
         deltaTime = ((NOW - LAST)*1000 / (double)SDL_GetPerformanceFrequency() );
-  //      printf("%lf %f\n", deltaTime, PLAYER_POSITION_Y );
         PLAYER_POSITION_Y += (VELOCITY * PADDLE_SPEED * deltaTime);
+        ClampPosition(&PLAYER_POSITION_Y);
         //render fun;
         SDL_SetRenderDrawColor(renderer, 0x00000000,0x0000000000,0x0000000000,0x0000000000);
         SDL_RenderClear(renderer);
@@ -91,7 +96,7 @@ int InitSDL(SDL_Window** win, SDL_Renderer** renderer, SDL_Surface** surface)
     }
     return 1;
 }
-void HandleInput(SDL_Event* ev)
+void HandleInput(SDL_Event* ev, Input* input)
 {
         switch(ev->type)
         {
@@ -101,14 +106,33 @@ void HandleInput(SDL_Event* ev)
                 {
                 case SDLK_w:
                 {
-                        VELOCITY = -1;
+                        input->up = 1;
+                     //   VELOCITY = -1;
                 }
                 break;
                 case SDLK_s:
                 {
-                    VELOCITY = 1;
+                    input->down = 1;
+                   // VELOCITY = 1;
                 }
                 break;
+            }
+            break;
+            case SDL_KEYUP:
+            {
+                switch (ev->key.keysym.sym)
+                {
+                    case SDLK_w:
+                    {
+                        input->up = 0;
+                    }
+                    break;
+                    case SDLK_s:
+                    {
+                        input->down = 0;
+                    }
+                    break;
+                }
             }
             break;
             case SDL_QUIT:
@@ -118,4 +142,28 @@ void HandleInput(SDL_Event* ev)
             }
         }
     }
+    if (input->up == 1)
+    {
+        VELOCITY = -1;
+    }
+    else if (input->down == 1)
+    {
+        VELOCITY = 1;
+    }
+    else 
+    {
+        VELOCITY = 0;
+    }
+    
+
+    
+    
+}
+void ClampPosition(float* playerPosY)
+{
+   const float pos = *playerPosY;
+   if(pos > WINDOW_HEIGHT)
+   {
+        *playerPosY = WINDOW_HEIGHT - (pos - PADDLE_HEIGHT);
+   }
 }
