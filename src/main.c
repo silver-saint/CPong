@@ -155,9 +155,6 @@ void HandleInput(SDL_Event* ev, Input* input)
         VELOCITY = 0;
     }
     
-
-    
-    
 }
 void ClampPosition(float* playerPosY)
 {
