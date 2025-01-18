@@ -39,6 +39,6 @@ rebuild: clean all
 # Debug target to run with gdb
 debug: $(TARGET)
 	@echo "Running in gdb..."
-	@SDL_DEBUG=1 SDL_VIDEODRIVER=x11 gdb attach 6466  -ex lay next  --args $(TARGET)
+	@SDL_DEBUG=1  gdb attach 4604  -ex lay next  --args $(TARGET)
 
 .PHONY: all clean rebuild debug
