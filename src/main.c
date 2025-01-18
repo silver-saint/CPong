@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "player.h"
-
+#include "types.h"
 //window
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -14,36 +14,37 @@
 #define PADDING 50
 #define PADDLE_SPEED 0.8
 //movement
-float  VELOCITY = 0;
-float PLAYER_POSITION_Y = 0; 
+f32  VELOCITY = 0;
+f32 PLAYER_POSITION_Y = 0; 
 //has game ended
-int quit = 0;
+i32 quit = 0;
 
 
-int InitSDL(SDL_Window** win, SDL_Renderer** renderer, SDL_Surface** surface);
+i32 InitSDL(SDL_Window** win, SDL_Renderer** renderer, SDL_Surface** surface);
 void HandleInput(SDL_Event* ev, Input* input);
-void ClampPosition(float* playerPos );
+void ClampPosition(f32 playerPos );
 void Drawbackground(SDL_Renderer* renderer);
 int main() 
 {
     SDL_Window* win = NULL;
     SDL_Renderer* renderer = NULL;
     SDL_Surface* surface = NULL;
-    uint8_t init = InitSDL(&win, &renderer, &surface);
+    u8 init = InitSDL(&win, &renderer, &surface);
    if(!init)
    {
         SDL_Quit();
         return -1;
    }
-    SDL_Rect p1;
-    SDL_Rect p2;
-    SDL_Event ev;
-    Uint64 NOW = SDL_GetPerformanceCounter();
-    Uint64 LAST = 0;
-    Input input = {0,0};
     
+    SDL_Rect p1 = InitPlayer( 0, ((WINDOW_HEIGHT / 2) - PADDING), PADDLE_WIDTH, PADDLE_HEIGHT);
+    SDL_Rect p2 =   InitPlayer( (WINDOW_WIDTH - PADDLE_WIDTH + 1), ((WINDOW_HEIGHT / 2) - PADDING), PADDLE_WIDTH, PADDLE_HEIGHT);
+    SDL_Event ev;
+    u64 NOW = SDL_GetPerformanceCounter();
+    u64 LAST = 0;
+    Input input = {0,0};
+    f64 moveByAmount = 0;
 
-    double deltaTime = 0;
+    f64 deltaTime = 0;
     while (!quit)
     {
         if(SDL_PollEvent(&ev))
@@ -52,16 +53,16 @@ int main()
         }
         LAST = NOW;
         NOW = SDL_GetPerformanceCounter();
-        deltaTime = ((NOW - LAST)*1000 / (double)SDL_GetPerformanceFrequency() );
-        PLAYER_POSITION_Y += (VELOCITY * PADDLE_SPEED * deltaTime);
-        ClampPosition(&PLAYER_POSITION_Y);
+        deltaTime = ((NOW - LAST)*1000 / (f64)SDL_GetPerformanceFrequency() );
+        moveByAmount = (VELOCITY * PADDLE_SPEED * deltaTime);
+         MovePlayer(&PLAYER_POSITION_Y, moveByAmount);
+        ClampPosition(PLAYER_POSITION_Y);
         
         //background
         Drawbackground(renderer);
-        //player
-        DrawPlayer(renderer,&p1, 0, (WINDOW_HEIGHT / 2.0f - PADDING) + PLAYER_POSITION_Y, PADDLE_WIDTH, PADDLE_HEIGHT);
-        //have to figure out why is there a seizure enducing effect on the second player
-        DrawPlayer(renderer, &p2, (WINDOW_WIDTH - PADDLE_WIDTH + 1), (WINDOW_HEIGHT / 2.0f - PADDING), PADDLE_WIDTH, PADDLE_HEIGHT);
+        //players
+        DrawPlayers(renderer,p1, p2);
+         //Move player
         }
     SDL_DestroyWindow(win);
     SDL_Quit();
@@ -156,19 +157,19 @@ void HandleInput(SDL_Event* ev, Input* input)
     }
     
 }
-void ClampPosition(float* playerPosY)
+void ClampPosition(f32 playerPosY)
 {
+    const i32 pos = (i32)(playerPosY);
     //temporary solution, I don't like this.
-   const int pos = (int)*playerPosY;
-   const int bottomBorder = (WINDOW_HEIGHT - PADDLE_HEIGHT) / 2; 
-   const int topBorder = -(WINDOW_HEIGHT - PADDLE_HEIGHT) / 2; 
+   const i32 bottomBorder = (WINDOW_HEIGHT - PADDLE_HEIGHT) / 2; 
+   const i32 topBorder = -(WINDOW_HEIGHT - PADDLE_HEIGHT) / 2; 
    if(pos > bottomBorder )
    {
-        *playerPosY = (WINDOW_HEIGHT - PADDLE_HEIGHT) / 2.0f ;
+        playerPosY = ((WINDOW_HEIGHT - PADDLE_HEIGHT) / 2.0f) ;
    }
    else if(pos < topBorder)
    {   
-    *playerPosY = -(WINDOW_HEIGHT - PADDLE_HEIGHT) / 2.0f;
+        playerPosY = -((WINDOW_HEIGHT - PADDLE_HEIGHT) / 2.0f);
    }
 }
 void Drawbackground(SDL_Renderer* renderer)

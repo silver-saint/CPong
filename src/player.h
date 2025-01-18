@@ -2,13 +2,14 @@
 #define PLAYER_H
 
 #include <SDL2/SDL.h>
-
+#include "types.h"
 typedef struct
 {
-    int32_t up;
-    int32_t down;
+    int up;
+    int down;
 } Input;
 
-void DrawPlayer(SDL_Renderer* renderer, SDL_Rect* player, int startPosX, int startPosY, int Width, int Height);
-
+SDL_Rect InitPlayer(i32 startPosX, i32 startPosY, i32 Width, i32 Height);
+void MovePlayer( f32* currentYPos, f64 moveBy);
+void DrawPlayers(SDL_Renderer* renderer ,SDL_Rect p1, SDL_Rect p2);
 #endif
